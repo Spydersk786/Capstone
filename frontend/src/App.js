@@ -33,9 +33,19 @@ function App() {
     };
   }, []);
 
+  const handleButtonClick = (scriptName) => {
+    const socket = io('http://127.0.0.1:5000'); // Change to your backend URL if needed
+    socket.emit('run_script', { script: scriptName });
+  };
+
   return (
     <div className="App" style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>Real-Time Data from Raspberry Pi</h1>
+      <h1>Control Scripts on Raspberry Pi</h1>
+      <div>
+        <button onClick={() => handleButtonClick('script1')}>Run Script 1</button>
+        <button onClick={() => handleButtonClick('script2')}>Run Script 2</button>
+        <button onClick={() => handleButtonClick('script3')}>Run Script 3</button>
+      </div>
       {isConnected ? (
         data ? (
           <div>

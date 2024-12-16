@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from flask_cors import CORS
+import subprocess
 
 app = Flask(__name__)
 
@@ -44,6 +45,22 @@ def get_data():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Function to run a script based on the event
+def run_script(script_name):
+    try:
+        if script_name == 'script1':
+            result = subprocess.run(['python3', '/path/to/script1.py'], capture_output=True, text=True)
+        elif script_name == 'script2':
+            result = subprocess.run(['python3', '/path/to/script2.py'], capture_output=True, text=True)
+        elif script_name == 'script3':
+            result = subprocess.run(['python3', '/path/to/script3.py'], capture_output=True, text=True)
+        else:
+            return f"Invalid script name: {script_name}"
+        
+        return result.stdout or result.stderr
+    except Exception as e:
+        return str(e)
+
 # Socket.IO event for testing real-time connection
 @socketio.on('connect')
 def handle_connect():
@@ -53,6 +70,14 @@ def handle_connect():
 @socketio.on('disconnect')
 def handle_disconnect():
     print("Frontend disconnected")
+
+# Event listener for script execution requests from frontend
+@socketio.on('run_script')
+def handle_run_script(data):
+    script_name = data.get('script')
+    print(f"Received request to run: {script_name}")
+    output = run_script(script_name)
+    emit('update', {'predict': output})
 
 if __name__ == '__main__':
     # Run the app and make it accessible on the network
