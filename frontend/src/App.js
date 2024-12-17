@@ -45,6 +45,8 @@ function App() {
         <button onClick={() => handleButtonClick('script1')}>Run Script 1</button>
         <button onClick={() => handleButtonClick('script2')}>Run Script 2</button>
         <button onClick={() => handleButtonClick('script3')}>Run Script 3</button>
+        <button onClick={() => handleButtonClick('script4')}>Run Script 4</button>
+        <button onClick={() => handleButtonClick('script5')}>Run Script 5</button>
       </div>
       {isConnected ? (
         data ? (

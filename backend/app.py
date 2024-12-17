@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-import subprocess
+import requests
 
 app = Flask(__name__)
 
@@ -13,6 +13,19 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # In-memory storage for sensor data (you can replace this with a database)
 sensor_data = {}
+
+# Raspberry Pi details (ensure it's on the same network)
+raspberry_ip = "192.168.80.19"  # Replace with your Raspberry Pi's IP address
+
+# Function to run a script on the Raspberry Pi by making an HTTP request
+def run_script_on_raspberry(script_name):
+    url = f"http://{raspberry_ip}:5001/run-script"
+    response = requests.post(url, json={"script": script_name})
+
+    if response.status_code == 200:
+        return response.json().get("output", "")
+    else:
+        return response.json().get("error", "Failed to run script")
 
 # Route to receive data from Raspberry Pi
 @app.route('/api/send-data', methods=['POST'])
@@ -45,22 +58,6 @@ def get_data():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# Function to run a script based on the event
-def run_script(script_name):
-    try:
-        if script_name == 'script1':
-            result = subprocess.run(['python3', '/path/to/script1.py'], capture_output=True, text=True)
-        elif script_name == 'script2':
-            result = subprocess.run(['python3', '/path/to/script2.py'], capture_output=True, text=True)
-        elif script_name == 'script3':
-            result = subprocess.run(['python3', '/path/to/script3.py'], capture_output=True, text=True)
-        else:
-            return f"Invalid script name: {script_name}"
-        
-        return result.stdout or result.stderr
-    except Exception as e:
-        return str(e)
-
 # Socket.IO event for testing real-time connection
 @socketio.on('connect')
 def handle_connect():
@@ -76,7 +73,7 @@ def handle_disconnect():
 def handle_run_script(data):
     script_name = data.get('script')
     print(f"Received request to run: {script_name}")
-    output = run_script(script_name)
+    output = run_script_on_raspberry(script_name)
     emit('update', {'predict': output})
 
 if __name__ == '__main__':
