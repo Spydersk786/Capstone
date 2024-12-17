@@ -42,11 +42,10 @@ function App() {
     <div className="App" style={{ textAlign: 'center', marginTop: '50px' }}>
       <h1>Control Scripts on Raspberry Pi</h1>
       <div>
-        <button onClick={() => handleButtonClick('script1')}>Run Script 1</button>
-        <button onClick={() => handleButtonClick('script2')}>Run Script 2</button>
-        <button onClick={() => handleButtonClick('script3')}>Run Script 3</button>
-        <button onClick={() => handleButtonClick('script4')}>Run Script 4</button>
-        <button onClick={() => handleButtonClick('script5')}>Run Script 5</button>
+        <button onClick={() => handleButtonClick('script2')}>SYN Flood</button>
+        <button onClick={() => handleButtonClick('script3')}>Http Flood</button>
+        <button onClick={() => handleButtonClick('script4')}>Port Scan</button>
+        <button onClick={() => handleButtonClick('script5')}>Ransomware</button>
       </div>
       {isConnected ? (
         data ? (
