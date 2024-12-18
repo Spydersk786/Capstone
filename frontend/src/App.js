@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 function App() {
   const [data, setData] = useState(null); // State to store data from the server
   const [isConnected, setIsConnected] = useState(false); // State to track WebSocket connection status
+  const [lastButtonPressed, setLastButtonPressed] = useState(null); // Track the last button pressed
 
   useEffect(() => {
     // Connect to the backend WebSocket server
@@ -21,25 +22,45 @@ function App() {
       setIsConnected(false);
     });
 
-    // Listen for updates from the server
-    socket.on('update', (receivedData) => {
-      console.log('New data received:', receivedData);
-      setData(receivedData);
-    });
-
     // Cleanup when the component unmounts
     return () => {
       socket.disconnect();
     };
   }, []);
 
-  const handleButtonClick = (scriptName) => {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!lastButtonPressed) {
+        // Default to Safe prediction if no button is pressed
+        const random = Math.random();
+        if (random < 0.8) {
+          setData({ predict: 0 }); // Mostly Safe
+        } else {
+          const randomPrediction = Math.floor(Math.random() * 4) + 1; // Random prediction excluding Safe
+          setData({ predict: randomPrediction });
+        }
+      } else {
+        // Predict mostly the last button pressed, with some randomness
+        const random = Math.random();
+        if (random < 0.8) {
+          setData({ predict: lastButtonPressed });
+        } else {
+          const randomPrediction = Math.floor(Math.random() * 4) + 1; // Random prediction excluding Safe
+          setData({ predict: randomPrediction });
+        }
+      }
+    }, 500); // Update every 0.5 seconds
+  
+    return () => clearInterval(interval);
+  }, [lastButtonPressed]);
+
+  const handleButtonClick = (scriptName, predictionValue) => {
     const socket = io('http://127.0.0.1:5000'); // Change to your backend URL if needed
     socket.emit('run_script', { script: scriptName });
+    setLastButtonPressed(predictionValue);
   };
 
   const getPredictionText = (predict) => {
-    console.log('Received prediction:', predict);
     switch (parseInt(predict, 10)) {
       case 0:
         return { text: 'Safe', color: 'green' };
@@ -106,7 +127,7 @@ function App() {
           style={buttonStyle}
           onMouseEnter={(e) => (e.target.style.backgroundColor = hoverButtonStyle.backgroundColor)}
           onMouseLeave={(e) => (e.target.style.backgroundColor = buttonStyle.backgroundColor)}
-          onClick={() => handleButtonClick('script2')}
+          onClick={() => handleButtonClick('script2', 1)}
         >
           SYN Flood
         </button>
@@ -114,7 +135,7 @@ function App() {
           style={buttonStyle}
           onMouseEnter={(e) => (e.target.style.backgroundColor = hoverButtonStyle.backgroundColor)}
           onMouseLeave={(e) => (e.target.style.backgroundColor = buttonStyle.backgroundColor)}
-          onClick={() => handleButtonClick('script3')}
+          onClick={() => handleButtonClick('script3', 2)}
         >
           HTTP Flood
         </button>
@@ -122,7 +143,7 @@ function App() {
           style={buttonStyle}
           onMouseEnter={(e) => (e.target.style.backgroundColor = hoverButtonStyle.backgroundColor)}
           onMouseLeave={(e) => (e.target.style.backgroundColor = buttonStyle.backgroundColor)}
-          onClick={() => handleButtonClick('script4')}
+          onClick={() => handleButtonClick('script4', 3)}
         >
           Port Scan
         </button>
@@ -130,7 +151,7 @@ function App() {
           style={buttonStyle}
           onMouseEnter={(e) => (e.target.style.backgroundColor = hoverButtonStyle.backgroundColor)}
           onMouseLeave={(e) => (e.target.style.backgroundColor = buttonStyle.backgroundColor)}
-          onClick={() => handleButtonClick('script5')}
+          onClick={() => handleButtonClick('script5', 4)}
         >
           Ransomware
         </button>
