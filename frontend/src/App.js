@@ -49,7 +49,7 @@ function App() {
           setData({ predict: randomPrediction });
         }
       }
-    }, 500); // Update every 0.5 seconds
+    }, 1000); // Update every 0.5 seconds
   
     return () => clearInterval(interval);
   }, [lastButtonPressed]);
